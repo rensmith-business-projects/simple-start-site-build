@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
@@ -14,7 +13,7 @@ const Services = () => {
           <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
       ),
-      description: "Get your business online with our website setup service. We handle domain registration, hosting setup, and basic website configuration so you can focus on your content."
+      description: "Get your business online with our website setup service. We handle domain registration, hosting setup, and basic website configuration with initial support included for free."
     },
     {
       id: 2,
@@ -50,7 +49,7 @@ const Services = () => {
           <path d="M2 6l3 3"></path>
         </svg>
       ),
-      description: "General IT support for your business needs. We help troubleshoot issues, provide guidance, and ensure your technology is working smoothly."
+      description: "Short-term IT support for your immediate business needs. We help troubleshoot issues, provide guidance, and ensure your technology is working correctly."
     },
     {
       id: 5,
@@ -93,7 +92,7 @@ const Services = () => {
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Services</h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8">
-            We offer a variety of tech services to help you get up and running with minimal hassle.
+            We offer a variety of tech services to help you get you up and running with minimal hassle. Free initial support included with all services.
           </p>
         </div>
       </section>
@@ -115,7 +114,7 @@ const Services = () => {
         </div>
       </section>
 
-      {/* Process Section */}
+      {/* Process Section - update to reflect no ongoing support */}
       <section className="py-16 bg-white px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">
@@ -174,7 +173,7 @@ const Services = () => {
               </div>
             </div>
             
-            {/* Step 4 */}
+            {/* Step 4 - Updated to reflect initial support only */}
             <div className="relative">
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-8 order-1 md:order-1 mb-4 md:mb-0 md:text-right"></div>
@@ -182,9 +181,9 @@ const Services = () => {
                   4
                 </div>
                 <div className="md:w-1/2 md:pl-8 order-2 md:order-2">
-                  <h3 className="text-xl font-semibold mb-2">Training & Support</h3>
+                  <h3 className="text-xl font-semibold mb-2">Free Initial Support</h3>
                   <p className="text-gray-600">
-                    We provide training and ongoing support to ensure you're comfortable using your new tech setup.
+                    We provide initial support to ensure you're comfortable using your new tech setup. Support is included at no extra cost.
                   </p>
                 </div>
               </div>
@@ -193,14 +192,14 @@ const Services = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Updated to reflect the freelance short-term nature */}
       <section className="py-16 px-4">
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to simplify your tech?
           </h2>
           <p className="text-xl mb-8 text-gray-700">
-            Let us handle the technical setup so you can focus on your business.
+            Let me handle the technical setup so you can focus on your business. No ongoing contracts, just straightforward solutions.
           </p>
           <Link to="/contact" className="btn-primary">
             Get Started Today
