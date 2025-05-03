@@ -16,6 +16,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+// UVDesk Configuration
+const UVDESK_CONFIG = {
+  apiUrl: "https://your-uvdesk-instance.com/api/v1/member/create-ticket", // Replace with your actual UVDesk URL
+  apiKey: "YOUR_UVDESK_API_KEY", // Replace with your actual UVDesk API key
+  ticketType: "request", 
+  ticketPriority: "normal"
+};
+
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -49,29 +57,29 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // UVDesk API endpoint - this would need to be configured with your actual endpoint
-      const uvdeskApiUrl = "https://your-uvdesk-instance.com/api/v1/member/create-ticket";
+      console.log("Submitting to UVDesk:", values);
       
       const ticketData = {
         name: values.name,
         from: values.email,
         subject: values.subject,
         message: values.message,
-        // You may need to add other required fields based on your UVDesk configuration
-        type: "request", // or whatever type you want to set
-        priority: "normal", // or whatever priority you want to set
+        type: UVDESK_CONFIG.ticketType,
+        priority: UVDESK_CONFIG.ticketPriority,
       };
       
-      const response = await fetch(uvdeskApiUrl, {
+      const response = await fetch(UVDESK_CONFIG.apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer YOUR_UVDESK_API_KEY" // Replace with your actual API key
+          "Authorization": `Bearer ${UVDESK_CONFIG.apiKey}`
         },
         body: JSON.stringify(ticketData),
       });
       
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error("UVDesk error response:", errorData);
         throw new Error(`Failed to submit ticket: ${response.status}`);
       }
       
