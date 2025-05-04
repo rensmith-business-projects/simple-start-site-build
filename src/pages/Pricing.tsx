@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -172,6 +171,36 @@ const Pricing = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* + More Section */}
+      <section className="py-12 px-4 bg-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <div className="inline-block mb-4 px-4 py-1 bg-orange/10 rounded-full">
+            <span className="text-orange font-semibold">+ More</span>
+          </div>
+          <h2 className="text-3xl font-bold mb-4">Need Something Custom?</h2>
+          <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+            We can help with many technology needs beyond what's listed. If you have a specific request or challenge, let us know and we'll find a solution.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+            <div className="bg-cream p-5 rounded-lg">
+              <h3 className="font-semibold text-lg mb-2">Custom Integrations</h3>
+              <p className="text-gray-700">Need to connect different systems? We can help.</p>
+            </div>
+            <div className="bg-cream p-5 rounded-lg">
+              <h3 className="font-semibold text-lg mb-2">Tech Training</h3>
+              <p className="text-gray-700">Personalized guidance on using your tech stack effectively.</p>
+            </div>
+            <div className="bg-cream p-5 rounded-lg">
+              <h3 className="font-semibold text-lg mb-2">Data Migration</h3>
+              <p className="text-gray-700">Move your data between systems safely and efficiently.</p>
+            </div>
+          </div>
+          <Link to="/contact" className="btn-secondary">
+            Discuss Your Custom Needs
+          </Link>
         </div>
       </section>
 
