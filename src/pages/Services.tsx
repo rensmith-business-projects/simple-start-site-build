@@ -13,7 +13,7 @@ const Services = () => {
           <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
       ),
-      description: "Get your business online with our website setup service. We handle domain registration, hosting setup, and basic website configuration with initial support included for free."
+      description: "Get your business online with our website setup service. We handle domain registration, hosting configuration, and basic website setup. Note: Hosting costs are not included and must be provided by you."
     },
     {
       id: 2,
@@ -24,7 +24,7 @@ const Services = () => {
           <polyline points="22,6 12,13 2,6"></polyline>
         </svg>
       ),
-      description: "Professional email setup with your domain name. We configure your email accounts, set up forwarding, and help you access your email from all your devices."
+      description: "Professional email setup with your domain name. We configure your email accounts, set up forwarding, and help you access your email from all your devices. Email hosting must be provided by you."
     },
     {
       id: 3,
@@ -34,7 +34,7 @@ const Services = () => {
           <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
         </svg>
       ),
-      description: "Get set up with the right cloud applications for your business needs, including CRM systems, project management tools, and other productivity software."
+      description: "Get set up with the right cloud applications for your business needs, including CRM systems, project management tools, and other productivity software. You'll need to cover the subscription costs for these services."
     },
     {
       id: 4,
@@ -92,7 +92,7 @@ const Services = () => {
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Services</h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8">
-            We offer a variety of tech services to help you get you up and running with minimal hassle. Free initial support included with all services.
+            We offer a variety of tech services to help you get you up and running with minimal hassle. Free initial support included with all services. Note: All hosting and subscription costs must be provided by you.
           </p>
         </div>
       </section>
@@ -111,6 +111,19 @@ const Services = () => {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Hosting Notice */}
+      <section className="py-8 px-4 bg-cream">
+        <div className="container mx-auto text-center max-w-3xl">
+          <h2 className="text-2xl font-bold mb-4">Important Note About Hosting</h2>
+          <p className="text-lg mb-4">
+            Our services focus on setup, configuration, and training. You will need to provide and pay for your own hosting services, domain registrations, and any subscription-based applications.
+          </p>
+          <p className="text-lg">
+            We're happy to recommend suitable hosting providers based on your specific needs and budget.
+          </p>
         </div>
       </section>
 
