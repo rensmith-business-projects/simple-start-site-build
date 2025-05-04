@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,11 +15,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { createClient } from "@supabase/supabase-js";
 
-// UVDesk Configuration
+// Empty default configuration - will be populated from Supabase secrets
 const UVDESK_CONFIG = {
-  apiUrl: "https://your-uvdesk-instance.com/api/v1/member/create-ticket", // Replace with your actual UVDesk URL
-  apiKey: "YOUR_UVDESK_API_KEY", // Replace with your actual UVDesk API key
+  apiUrl: "", 
+  apiKey: "",
   ticketType: "request", 
   ticketPriority: "normal"
 };
@@ -42,6 +43,42 @@ const formSchema = z.object({
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [configLoaded, setConfigLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        // Initialize the Supabase client - these values are automatically available on the deployed site
+        const supabase = createClient(
+          import.meta.env.VITE_SUPABASE_URL || '',
+          import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+        );
+        
+        // Fetch secrets from Supabase
+        const { data, error } = await supabase.functions.invoke('get-uvdesk-secrets');
+        
+        if (error) {
+          console.error('Error fetching UVDesk config:', error);
+          toast({
+            title: "Configuration error",
+            description: "Couldn't load UVDesk configuration. Contact support if the issue persists.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (data) {
+          UVDESK_CONFIG.apiUrl = data.apiUrl;
+          UVDESK_CONFIG.apiKey = data.apiKey;
+          setConfigLoaded(true);
+        }
+      } catch (err) {
+        console.error('Failed to load UVDesk configuration:', err);
+      }
+    }
+    
+    loadConfig();
+  }, [toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +91,15 @@ const Contact = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!configLoaded || !UVDESK_CONFIG.apiUrl || !UVDESK_CONFIG.apiKey) {
+      toast({
+        title: "Configuration error",
+        description: "UVDesk configuration is incomplete. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
