@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
   FormLabel,
   FormMessage 
 } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -38,6 +38,8 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
+  const [showFallbackDialog, setShowFallbackDialog] = useState(false);
+  const [fallbackMessage, setFallbackMessage] = useState<any>(null);
 
   useEffect(() => {
     async function testConnection() {
@@ -124,6 +126,20 @@ const Contact = () => {
         throw new Error(`Function error: ${error.message}`);
       }
       
+      // Check if we need to use fallback method (email)
+      if (data.fallback) {
+        console.log("UVDesk API unavailable, showing fallback instructions:", data);
+        setFallbackMessage({
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          message: values.message,
+          error: data.error || "UVDesk API is currently unavailable"
+        });
+        setShowFallbackDialog(true);
+        return;
+      }
+      
       if (data.error) {
         console.error("UVDesk ticket creation failed:", data.error);
         throw new Error(data.error);
@@ -147,6 +163,36 @@ const Contact = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast({
+          title: "Copied!",
+          description: "Text copied to clipboard.",
+        });
+      },
+      (err) => {
+        console.error("Could not copy text: ", err);
+        toast({
+          title: "Copy failed",
+          description: "Failed to copy text to clipboard.",
+          variant: "destructive",
+        });
+      }
+    );
+  };
+
+  // Format message for copying
+  const getFormattedMessage = () => {
+    if (!fallbackMessage) return "";
+    
+    return `Name: ${fallbackMessage.name}
+Email: ${fallbackMessage.email}
+Subject: ${fallbackMessage.subject}
+
+${fallbackMessage.message}`;
   };
 
   return (
@@ -334,6 +380,60 @@ const Contact = () => {
           </div>
         </div>
       </section>
+
+      {/* Fallback Dialog for when UVDesk API is unavailable */}
+      <Dialog open={showFallbackDialog} onOpenChange={setShowFallbackDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>UVDesk API Unavailable</DialogTitle>
+            <DialogDescription>
+              We couldn't submit your ticket directly to our support system. Please use one of these alternatives:
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <Alert>
+              <AlertTitle>Trial Plan Limitation</AlertTitle>
+              <AlertDescription>
+                UVDesk trial plans don't support API access. Please send your message directly via email.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium">Email us directly:</h4>
+              <p className="text-sm">
+                <a 
+                  href={`mailto:hello@simplestarttech.com?subject=${encodeURIComponent(fallbackMessage?.subject || '')}&body=${encodeURIComponent(fallbackMessage?.message || '')}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  hello@simplestarttech.com
+                </a>
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium">Or copy your message:</h4>
+              <div className="bg-gray-100 p-3 rounded-md text-sm overflow-auto max-h-40">
+                <pre>{getFormattedMessage()}</pre>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full mt-2"
+                onClick={() => copyToClipboard(getFormattedMessage())}
+              >
+                Copy to Clipboard
+              </Button>
+            </div>
+            
+            <Button 
+              className="w-full" 
+              onClick={() => setShowFallbackDialog(false)}
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

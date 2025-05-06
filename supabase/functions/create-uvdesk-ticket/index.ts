@@ -22,7 +22,8 @@ serve(async (req) => {
       console.error("UVDesk configuration is incomplete");
       return new Response(
         JSON.stringify({
-          error: "UVDesk configuration is incomplete. Please set all required environment variables."
+          error: "UVDesk configuration is incomplete. Please set all required environment variables.",
+          fallback: true
         }),
         {
           status: 500,
@@ -76,11 +77,27 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error("UVDesk error response:", errorText);
       
+      // Check if this is the trial plan API access error
+      if (errorText.includes("disabled for trial plans")) {
+        return new Response(
+          JSON.stringify({ 
+            error: "UVDesk API access is not available on your trial plan",
+            details: "Support for APIs has been disabled for trial plans. Please contact UVDesk support to enable this feature.",
+            fallback: true
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ 
           error: "Failed to create ticket in UVDesk",
           status: response.status,
-          details: errorText
+          details: errorText,
+          fallback: true
         }),
         {
           status: response.status,
@@ -109,7 +126,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: "Failed to process ticket creation",
-        details: error.message 
+        details: error.message,
+        fallback: true
       }),
       { 
         status: 500,
