@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { 
   Form,
   FormControl,
@@ -16,14 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-
-// Config will be populated from Supabase secrets
-const UVDESK_CONFIG = {
-  apiUrl: "", 
-  apiKey: "",
-  ticketType: "request", 
-  ticketPriority: "normal"
-};
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -47,9 +40,9 @@ const Contact = () => {
   const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadConfig() {
+    async function testConnection() {
       try {
-        console.log("Fetching UVDesk configuration from Supabase...");
+        console.log("Testing UVDesk configuration...");
         
         // Fetch secrets from Supabase edge function
         const { data, error } = await supabase.functions.invoke('get-uvdesk-secrets');
@@ -77,8 +70,6 @@ const Contact = () => {
         }
         
         console.log("UVDesk configuration loaded successfully");
-        UVDESK_CONFIG.apiUrl = data.apiUrl;
-        UVDESK_CONFIG.apiKey = data.apiKey;
         setConfigLoaded(true);
       } catch (err) {
         console.error('Failed to load UVDesk configuration:', err);
@@ -86,7 +77,7 @@ const Contact = () => {
       }
     }
     
-    loadConfig();
+    testConnection();
   }, [toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -100,7 +91,7 @@ const Contact = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!configLoaded || !UVDESK_CONFIG.apiUrl || !UVDESK_CONFIG.apiKey) {
+    if (!configLoaded) {
       toast({
         title: "Configuration error",
         description: "UVDesk configuration is incomplete. Please try again later.",
@@ -119,31 +110,26 @@ const Contact = () => {
         from: values.email,
         subject: values.subject,
         message: values.message,
-        type: UVDESK_CONFIG.ticketType,
-        priority: UVDESK_CONFIG.ticketPriority,
       };
       
-      console.log(`Submitting ticket to UVDesk API at: ${UVDESK_CONFIG.apiUrl}`);
+      console.log("Submitting ticket to create-uvdesk-ticket function");
       
-      const response = await fetch(UVDESK_CONFIG.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${UVDESK_CONFIG.apiKey}`
-        },
-        body: JSON.stringify(ticketData),
+      // Use the dedicated create-ticket function
+      const { data, error } = await supabase.functions.invoke('create-uvdesk-ticket', {
+        body: ticketData
       });
       
-      console.log("UVDesk API response status:", response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("UVDesk error response:", errorData);
-        throw new Error(`Failed to submit ticket: ${response.status} - ${errorData}`);
+      if (error) {
+        console.error("Error from create-uvdesk-ticket function:", error);
+        throw new Error(`Function error: ${error.message}`);
       }
       
-      const responseData = await response.json();
-      console.log("UVDesk ticket created successfully:", responseData);
+      if (data.error) {
+        console.error("UVDesk ticket creation failed:", data.error);
+        throw new Error(data.error);
+      }
+      
+      console.log("UVDesk ticket created successfully:", data);
       
       toast({
         title: "Ticket created!",
@@ -152,7 +138,7 @@ const Contact = () => {
       
       form.reset();
     } catch (error) {
-      console.error("Error submitting to UVDesk:", error);
+      console.error("Error submitting support ticket:", error);
       toast({
         title: "Submission failed",
         description: `There was an issue creating your support ticket: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -184,11 +170,13 @@ const Contact = () => {
               <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
               
               {configError && (
-                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
-                  <p className="font-medium">UVDesk configuration error:</p>
-                  <p>{configError}</p>
-                  <p className="mt-2 text-sm">Please contact the administrator to check Supabase secrets.</p>
-                </div>
+                <Alert variant="destructive" className="mb-6">
+                  <AlertTitle>UVDesk configuration error</AlertTitle>
+                  <AlertDescription>
+                    <p>{configError}</p>
+                    <p className="mt-2 text-sm">Please contact the administrator to check Supabase secrets.</p>
+                  </AlertDescription>
+                </Alert>
               )}
               
               <Form {...form}>

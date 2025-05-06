@@ -1,1 +1,5 @@
+
 project_id = "avucafcdirrtzhxcxqrk"
+
+[functions.create-uvdesk-ticket]
+verify_jwt = false
