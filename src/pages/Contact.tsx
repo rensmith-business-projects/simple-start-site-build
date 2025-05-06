@@ -15,9 +15,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
-// Empty default configuration - will be populated from Supabase secrets
+// Config will be populated from Supabase secrets
 const UVDESK_CONFIG = {
   apiUrl: "", 
   apiKey: "",
@@ -44,21 +44,19 @@ const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadConfig() {
       try {
-        // Initialize the Supabase client - these values are automatically available on the deployed site
-        const supabase = createClient(
-          import.meta.env.VITE_SUPABASE_URL || '',
-          import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-        );
+        console.log("Fetching UVDesk configuration from Supabase...");
         
-        // Fetch secrets from Supabase
+        // Fetch secrets from Supabase edge function
         const { data, error } = await supabase.functions.invoke('get-uvdesk-secrets');
         
         if (error) {
           console.error('Error fetching UVDesk config:', error);
+          setConfigError(`Config error: ${error.message}`);
           toast({
             title: "Configuration error",
             description: "Couldn't load UVDesk configuration. Contact support if the issue persists.",
@@ -67,13 +65,24 @@ const Contact = () => {
           return;
         }
         
-        if (data) {
-          UVDESK_CONFIG.apiUrl = data.apiUrl;
-          UVDESK_CONFIG.apiKey = data.apiKey;
-          setConfigLoaded(true);
+        if (!data || !data.apiUrl || !data.apiKey) {
+          console.error('Invalid UVDesk config data:', data);
+          setConfigError("Missing API URL or key in configuration");
+          toast({
+            title: "Configuration error",
+            description: "UVDesk configuration is incomplete. Please check Supabase secrets.",
+            variant: "destructive",
+          });
+          return;
         }
+        
+        console.log("UVDesk configuration loaded successfully");
+        UVDESK_CONFIG.apiUrl = data.apiUrl;
+        UVDESK_CONFIG.apiKey = data.apiKey;
+        setConfigLoaded(true);
       } catch (err) {
         console.error('Failed to load UVDesk configuration:', err);
+        setConfigError(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
     
@@ -103,7 +112,7 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      console.log("Submitting to UVDesk:", values);
+      console.log("Preparing ticket data for UVDesk:", values);
       
       const ticketData = {
         name: values.name,
@@ -114,6 +123,8 @@ const Contact = () => {
         priority: UVDESK_CONFIG.ticketPriority,
       };
       
+      console.log(`Submitting ticket to UVDesk API at: ${UVDESK_CONFIG.apiUrl}`);
+      
       const response = await fetch(UVDESK_CONFIG.apiUrl, {
         method: "POST",
         headers: {
@@ -123,11 +134,16 @@ const Contact = () => {
         body: JSON.stringify(ticketData),
       });
       
+      console.log("UVDesk API response status:", response.status);
+      
       if (!response.ok) {
         const errorData = await response.text();
         console.error("UVDesk error response:", errorData);
-        throw new Error(`Failed to submit ticket: ${response.status}`);
+        throw new Error(`Failed to submit ticket: ${response.status} - ${errorData}`);
       }
+      
+      const responseData = await response.json();
+      console.log("UVDesk ticket created successfully:", responseData);
       
       toast({
         title: "Ticket created!",
@@ -139,7 +155,7 @@ const Contact = () => {
       console.error("Error submitting to UVDesk:", error);
       toast({
         title: "Submission failed",
-        description: "There was an issue creating your support ticket. Please try again later.",
+        description: `There was an issue creating your support ticket: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -166,6 +182,14 @@ const Contact = () => {
             {/* Contact Form */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+              
+              {configError && (
+                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
+                  <p className="font-medium">UVDesk configuration error:</p>
+                  <p>{configError}</p>
+                  <p className="mt-2 text-sm">Please contact the administrator to check Supabase secrets.</p>
+                </div>
+              )}
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -243,7 +267,7 @@ const Contact = () => {
                   <Button 
                     type="submit" 
                     className="w-full"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !configLoaded}
                   >
                     {isSubmitting ? (
                       <>
@@ -253,7 +277,7 @@ const Contact = () => {
                         </svg>
                         Creating Ticket...
                       </>
-                    ) : 'Submit Support Request'}
+                    ) : !configLoaded ? 'Loading Configuration...' : 'Submit Support Request'}
                   </Button>
                 </form>
               </Form>
