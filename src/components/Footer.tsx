@@ -29,13 +29,13 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <p className="text-sm text-gray-600 mb-2">
-              <a href="mailto:hello@simplestarttech.com" className="hover:text-orange transition-colors">
-                hello@simplestarttech.com
+              <a href="mailto:contact@simplestart.tech" className="hover:text-orange transition-colors">
+                contact@simplestart.tech
               </a>
             </p>
             <p className="text-sm text-gray-600">
-              <a href="tel:+11234567890" className="hover:text-orange transition-colors">
-                (123) 456-7890
+              <a href="tel:+61396857241" className="hover:text-orange transition-colors">
+                +61 (03) 9685 7241
               </a>
             </p>
           </div>

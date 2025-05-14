@@ -331,7 +331,7 @@ ${fallbackMessage.message}`;
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">Email</p>
-                      <p className="text-sm text-gray-700">hello@simplestarttech.com</p>
+                      <p className="text-sm text-gray-700">contact@simplestart.tech</p>
                     </div>
                   </div>
                   
@@ -343,7 +343,7 @@ ${fallbackMessage.message}`;
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-gray-900">Phone</p>
-                      <p className="text-sm text-gray-700">(123) 456-7890</p>
+                      <p className="text-sm text-gray-700">+61 (03) 9685 7241</p>
                     </div>
                   </div>
                   
@@ -403,10 +403,10 @@ ${fallbackMessage.message}`;
               <h4 className="font-medium">Email us directly:</h4>
               <p className="text-sm">
                 <a 
-                  href={`mailto:hello@simplestarttech.com?subject=${encodeURIComponent(fallbackMessage?.subject || '')}&body=${encodeURIComponent(fallbackMessage?.message || '')}`}
+                  href={`mailto:contact@simplestart.tech?subject=${encodeURIComponent(fallbackMessage?.subject || '')}&body=${encodeURIComponent(fallbackMessage?.message || '')}`}
                   className="text-blue-600 hover:underline"
                 >
-                  hello@simplestarttech.com
+                  contact@simplestart.tech
                 </a>
               </p>
             </div>
