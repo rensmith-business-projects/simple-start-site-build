@@ -28,7 +28,7 @@ const formSchema = z.object({
   subject: z.string().min(1, {
     message: "Please select a subject.",
   }),
-  message: z.string().min(10, {
+  reply: z.string().min(10, {
     message: "Message must be at least 10 characters.",
   }),
 });
@@ -88,7 +88,7 @@ const Contact = () => {
       name: "",
       email: "",
       subject: "",
-      message: "",
+      reply: "",
     },
   });
 
@@ -111,7 +111,7 @@ const Contact = () => {
         name: values.name,
         from: values.email,
         subject: values.subject,
-        message: values.message,
+        reply: values.reply,
       };
       
       console.log("Submitting ticket to create-uvdesk-ticket function");
@@ -133,7 +133,7 @@ const Contact = () => {
           name: values.name,
           email: values.email,
           subject: values.subject,
-          message: values.message,
+          reply: values.reply,
           error: data.error || "UVDesk API is currently unavailable"
         });
         setShowFallbackDialog(true);
@@ -281,7 +281,7 @@ ${fallbackMessage.message}`;
                   
                   <FormField
                     control={form.control}
-                    name="message"
+                    name="reply"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Message</FormLabel>
