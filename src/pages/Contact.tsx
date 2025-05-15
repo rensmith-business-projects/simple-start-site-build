@@ -370,10 +370,10 @@ ${fallbackMessage.message}`;
                 
                 {/* Placeholder for Calendly - in a real app, this would be a Calendly embed */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <p className="text-gray-500 mb-4">Calendly Booking Widget</p>
-                  <a href="https://calendly.com" target="_blank" rel="noopener noreferrer" className="btn-primary">
-                    Book a Time Slot
-                  </a>
+                 <!-- Calendly inline widget begin -->
+<div class="calendly-inline-widget" data-url="https://calendly.com/contactbeau7" style="min-width:320px;height:700px;"></div>
+<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+<!-- Calendly inline widget end -->
                 </div>
               </div>
             </div>
