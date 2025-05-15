@@ -99,7 +99,7 @@ const About = () => {
           
           <div className="max-w-sm mx-auto">
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="h-32 w-32 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              
               <h3 className="text-xl font-semibold mb-1">Beau Smith</h3>
               <p className="text-orange mb-4">Founder & Tech Specialist</p>
               <p className="text-gray-600 mb-4">
