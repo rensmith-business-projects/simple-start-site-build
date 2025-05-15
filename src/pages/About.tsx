@@ -100,10 +100,10 @@ const About = () => {
           <div className="max-w-sm mx-auto">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="h-32 w-32 bg-gray-200 rounded-full mx-auto mb-4"></div>
-              <h3 className="text-xl font-semibold mb-1">Sam Johnson</h3>
+              <h3 className="text-xl font-semibold mb-1">Beau Smith</h3>
               <p className="text-orange mb-4">Founder & Tech Specialist</p>
               <p className="text-gray-600 mb-4">
-                With over 10 years of experience in IT support and web development, Sam founded SimpleStartTech to help small businesses navigate the often confusing world of technology.
+              At just age 17 Beau has completed his certificate 3 in IT and started His bachelor of IT in just year 12, Beau founded SimpleStartTech to help small businesses navigate the often confusing world of technology.
               </p>
               <div className="flex justify-center space-x-4">
                 <a href="#" className="text-gray-500 hover:text-orange transition-colors">
