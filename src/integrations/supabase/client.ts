@@ -4,8 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Replace these with your self-hosted Supabase instance details
-const SUPABASE_URL = "https://your-supabase-instance.com"; // Replace with your self-hosted URL
-const SUPABASE_PUBLISHABLE_KEY = "your-anon-key-here"; // Replace with your anon/public key
+const SUPABASE_URL = "https://supabase.simplestart.tech";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUxMzc4NDAwLCJleHAiOjE5MDkxNDQ4MDB9.Y_Eto4sjTO19n0fId0rWUNPiXx-XIBSR4sMkjiiRMxY";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
