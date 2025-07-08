@@ -29,11 +29,15 @@ const formSchema = z.object({
   message: z.string().min(10, {
     message: "Message must be at least 10 characters.",
   }),
+  frappeUrl: z.string().url({
+    message: "Please enter a valid Frappe Helpdesk URL.",
+  }).optional(),
 });
 
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [frappeUrl, setFrappeUrl] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +46,7 @@ const Contact = () => {
       email: "",
       subject: "",
       message: "",
+      frappeUrl: "",
     },
   });
 
@@ -49,22 +54,58 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const helpdeskUrl = frappeUrl || values.frappeUrl;
       
-      console.log("Form submitted:", values);
-      
-      toast({
-        title: "Message sent!",
-        description: "Thank you for your message. We'll get back to you soon.",
+      if (!helpdeskUrl) {
+        toast({
+          title: "Configuration Required",
+          description: "Please enter your Frappe Helpdesk URL to submit tickets.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create ticket in Frappe Helpdesk
+      const ticketData = {
+        subject: `${values.subject}: ${values.name}`,
+        description: values.message,
+        raised_by: values.email,
+        contact: values.email,
+        status: "Open",
+        priority: "Medium",
+        ticket_type: "Issue"
+      };
+
+      console.log("Submitting ticket to Frappe Helpdesk:", ticketData);
+
+      const response = await fetch(`${helpdeskUrl}/api/resource/HD Ticket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(ticketData),
       });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Ticket created successfully:", result);
+        
+        toast({
+          title: "Support ticket created!",
+          description: `Your ticket has been submitted successfully. Ticket ID: ${result.data?.name || 'Generated'}`,
+        });
+        
+        form.reset();
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      form.reset();
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error submitting ticket:", error);
       toast({
         title: "Submission failed",
-        description: "There was an issue sending your message. Please try again.",
+        description: "There was an issue creating your support ticket. Please check your Frappe Helpdesk URL and try again.",
         variant: "destructive",
       });
     } finally {
@@ -79,7 +120,7 @@ const Contact = () => {
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            Get in touch with us to discuss how we can help with your tech needs.
+            Get in touch with us to discuss how we can help with your tech needs. Your message will create a support ticket in our helpdesk system.
           </p>
         </div>
       </section>
@@ -88,9 +129,32 @@ const Contact = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Frappe Helpdesk Configuration */}
+            <div className="bg-orange-50 p-6 md:p-8 rounded-lg shadow-md mb-8 lg:col-span-2">
+              <h2 className="text-2xl font-bold mb-6">Frappe Helpdesk Configuration</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="frappeUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                    Frappe Helpdesk URL
+                  </label>
+                  <Input
+                    id="frappeUrl"
+                    type="url"
+                    placeholder="https://your-helpdesk.frappe.cloud"
+                    value={frappeUrl}
+                    onChange={(e) => setFrappeUrl(e.target.value)}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">
+                    Enter your Frappe Helpdesk instance URL to enable ticket creation
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Contact Form */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+              <h2 className="text-2xl font-bold mb-6">Create Support Ticket</h2>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -138,6 +202,8 @@ const Contact = () => {
                             <option value="Email Configuration">Email Configuration</option>
                             <option value="Cloud Apps Setup">Cloud Apps Setup</option>
                             <option value="IT Support">IT Support</option>
+                            <option value="Technical Issue">Technical Issue</option>
+                            <option value="Feature Request">Feature Request</option>
                             <option value="Other">Other</option>
                           </select>
                         </FormControl>
@@ -154,7 +220,7 @@ const Contact = () => {
                         <FormLabel>Message</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="How can we help you?" 
+                            placeholder="Describe your issue or request in detail..." 
                             className="resize-none" 
                             rows={5}
                             {...field} 
@@ -172,9 +238,9 @@ const Contact = () => {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Sending...
+                        Creating Ticket...
                       </>
-                    ) : 'Send Message'}
+                    ) : 'Create Support Ticket'}
                   </Button>
                 </form>
               </Form>
