@@ -35,8 +35,8 @@ const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Hardcoded Frappe Helpdesk URL
-  const FRAPPE_HELPDESK_URL = "https://frappe.simplestart.tech";
+  // Webhook URL - you can configure this in your webhook service
+  const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_KEY/";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,35 +52,36 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Create ticket in Frappe Helpdesk
-      const ticketData = {
-        subject: `${values.subject}: ${values.name}`,
-        description: values.message,
-        raised_by: values.email,
-        contact: values.email,
-        status: "Open",
-        priority: "Medium",
-        ticket_type: "Issue"
+      // Send data to webhook
+      const webhookData = {
+        name: values.name,
+        email: values.email,
+        subject: values.subject,
+        message: values.message,
+        timestamp: new Date().toISOString(),
+        source: "Contact Form",
+        // Additional metadata
+        user_agent: navigator.userAgent,
+        page_url: window.location.href
       };
 
-      console.log("Submitting ticket to Frappe Helpdesk:", ticketData);
+      console.log("Sending data to webhook:", webhookData);
 
-      const response = await fetch(`${FRAPPE_HELPDESK_URL}/api/resource/HD Ticket`, {
+      const response = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: JSON.stringify(ticketData),
+        body: JSON.stringify(webhookData),
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("Ticket created successfully:", result);
+        console.log("Webhook triggered successfully");
         
         toast({
-          title: "Support ticket created!",
-          description: `Your ticket has been submitted successfully. Ticket ID: ${result.data?.name || 'Generated'}`,
+          title: "Support request submitted!",
+          description: "Your message has been sent successfully. We'll get back to you soon!",
         });
         
         form.reset();
@@ -89,22 +90,13 @@ const Contact = () => {
       }
       
     } catch (error) {
-      console.error("Error submitting ticket:", error);
+      console.error("Error sending webhook:", error);
       
-      // Check if it's a CORS error
-      if (error instanceof TypeError && error.message.includes('NetworkError')) {
-        toast({
-          title: "CORS Configuration Required",
-          description: "The Frappe server needs to be configured to allow requests from this domain. Please contact your administrator to configure CORS settings, or use the direct contact information below.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Submission failed",
-          description: "There was an issue creating your support ticket. Please try again or contact us directly using the information below.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Submission failed",
+        description: "There was an issue sending your message. Please try again or contact us directly using the information below.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -117,23 +109,23 @@ const Contact = () => {
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            Get in touch with us to discuss how we can help with your tech needs. Your message will create a support ticket in our helpdesk system.
+            Get in touch with us to discuss how we can help with your tech needs. Your message will be processed through our webhook system.
           </p>
         </div>
       </section>
 
-      {/* CORS Notice */}
-      <section className="py-4 px-4 bg-yellow-50 border-l-4 border-yellow-400">
+      {/* Webhook Info */}
+      <section className="py-4 px-4 bg-blue-50 border-l-4 border-blue-400">
         <div className="container mx-auto">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                <strong>Note:</strong> If the form submission fails due to CORS restrictions, please use the direct contact information below or ask your administrator to configure CORS settings for this domain.
+              <p className="text-sm text-blue-700">
+                <strong>Webhook Integration:</strong> This form uses webhooks to process your submission. Configure your webhook URL in the code to connect to your preferred service (Zapier, Make, n8n, etc.).
               </p>
             </div>
           </div>
@@ -146,7 +138,7 @@ const Contact = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-6">Create Support Ticket</h2>
+              <h2 className="text-2xl font-bold mb-6">Send Message via Webhook</h2>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -230,15 +222,15 @@ const Contact = () => {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Creating Ticket...
+                        Sending Message...
                       </>
-                    ) : 'Create Support Ticket'}
+                    ) : 'Send Message'}
                   </Button>
                 </form>
               </Form>
             </div>
             
-            {/* Contact Information & Calendly */}
+            {/* Contact Information & Webhook Guide */}
             <div>
               <div className="bg-cream p-6 md:p-8 rounded-lg shadow-md mb-8">
                 <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
@@ -286,9 +278,88 @@ const Contact = () => {
           </div>
         </div>
       </section>
+
+      {/* Webhook Setup Guide */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Webhook Setup Guide</h2>
+          
+          <div className="space-y-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">What are Webhooks?</h3>
+              <p className="text-gray-700 mb-4">
+                Webhooks are HTTP callbacks that allow one application to send real-time data to another application when specific events occur. 
+                Instead of polling for changes, webhooks push data to your endpoint immediately when something happens.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Step 1: Choose a Webhook Service</h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-2">
+                <li><strong>Zapier:</strong> Easy to use, connects to 6000+ apps</li>
+                <li><strong>Make (formerly Integromat):</strong> More advanced automation features</li>
+                <li><strong>n8n:</strong> Open-source alternative with self-hosting options</li>
+                <li><strong>Webhooks.site:</strong> Great for testing webhook URLs</li>
+                <li><strong>Custom Server:</strong> Build your own webhook endpoint</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Step 2: Set Up Your Webhook (Zapier Example)</h3>
+              <ol className="list-decimal list-inside text-gray-700 space-y-2">
+                <li>Create a new Zap in Zapier</li>
+                <li>Choose "Webhooks by Zapier" as the trigger app</li>
+                <li>Select "Catch Hook" as the trigger event</li>
+                <li>Copy the webhook URL provided by Zapier</li>
+                <li>Replace the WEBHOOK_URL in the code with your actual URL</li>
+                <li>Set up actions (create Frappe ticket, send email, etc.)</li>
+              </ol>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Step 3: Configure Actions</h3>
+              <p className="text-gray-700 mb-4">Once your webhook receives the form data, you can:</p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2">
+                <li>Create tickets in Frappe Helpdesk</li>
+                <li>Send email notifications</li>
+                <li>Add data to Google Sheets or Airtable</li>
+                <li>Send Slack/Teams notifications</li>
+                <li>Store data in databases</li>
+                <li>Trigger other automations</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Step 4: Test Your Webhook</h3>
+              <ol className="list-decimal list-inside text-gray-700 space-y-2">
+                <li>Fill out the contact form above</li>
+                <li>Check your webhook service dashboard</li>
+                <li>Verify the data was received correctly</li>
+                <li>Test your configured actions</li>
+                <li>Monitor for any errors or issues</li>
+              </ol>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Data Structure Sent to Webhook</h3>
+              <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
+{`{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "IT Support",
+  "message": "Need help with...",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "source": "Contact Form",
+  "user_agent": "Mozilla/5.0...",
+  "page_url": "https://yoursite.com/contact"
+}`}
+              </pre>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
 
 export default Contact;
-
