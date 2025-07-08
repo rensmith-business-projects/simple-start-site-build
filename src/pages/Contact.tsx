@@ -90,11 +90,21 @@ const Contact = () => {
       
     } catch (error) {
       console.error("Error submitting ticket:", error);
-      toast({
-        title: "Submission failed",
-        description: "There was an issue creating your support ticket. Please try again or contact us directly.",
-        variant: "destructive",
-      });
+      
+      // Check if it's a CORS error
+      if (error instanceof TypeError && error.message.includes('NetworkError')) {
+        toast({
+          title: "CORS Configuration Required",
+          description: "The Frappe server needs to be configured to allow requests from this domain. Please contact your administrator to configure CORS settings, or use the direct contact information below.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Submission failed",
+          description: "There was an issue creating your support ticket. Please try again or contact us directly using the information below.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -109,6 +119,24 @@ const Contact = () => {
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             Get in touch with us to discuss how we can help with your tech needs. Your message will create a support ticket in our helpdesk system.
           </p>
+        </div>
+      </section>
+
+      {/* CORS Notice */}
+      <section className="py-4 px-4 bg-yellow-50 border-l-4 border-yellow-400">
+        <div className="container mx-auto">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Note:</strong> If the form submission fails due to CORS restrictions, please use the direct contact information below or ask your administrator to configure CORS settings for this domain.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -263,3 +291,4 @@ const Contact = () => {
 };
 
 export default Contact;
+
