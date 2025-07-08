@@ -29,15 +29,14 @@ const formSchema = z.object({
   message: z.string().min(10, {
     message: "Message must be at least 10 characters.",
   }),
-  frappeUrl: z.string().url({
-    message: "Please enter a valid Frappe Helpdesk URL.",
-  }).optional(),
 });
 
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [frappeUrl, setFrappeUrl] = useState("");
+  
+  // Hardcoded Frappe Helpdesk URL
+  const FRAPPE_HELPDESK_URL = "https://frappe.simplestart.tech";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,7 +45,6 @@ const Contact = () => {
       email: "",
       subject: "",
       message: "",
-      frappeUrl: "/frappe.simplestart.tech",
     },
   });
 
@@ -54,17 +52,6 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      const helpdeskUrl = frappeUrl || values.frappeUrl;
-      
-      if (!helpdeskUrl) {
-        toast({
-          title: "Configuration Required",
-          description: "Please enter your Frappe Helpdesk URL to submit tickets.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Create ticket in Frappe Helpdesk
       const ticketData = {
         subject: `${values.subject}: ${values.name}`,
@@ -78,7 +65,7 @@ const Contact = () => {
 
       console.log("Submitting ticket to Frappe Helpdesk:", ticketData);
 
-      const response = await fetch(`${helpdeskUrl}/api/resource/HD Ticket`, {
+      const response = await fetch(`${FRAPPE_HELPDESK_URL}/api/resource/HD Ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +92,7 @@ const Contact = () => {
       console.error("Error submitting ticket:", error);
       toast({
         title: "Submission failed",
-        description: "There was an issue creating your support ticket. Please check your Frappe Helpdesk URL and try again.",
+        description: "There was an issue creating your support ticket. Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
@@ -129,29 +116,6 @@ const Contact = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Frappe Helpdesk Configuration */}
-            <div className="bg-orange-50 p-6 md:p-8 rounded-lg shadow-md mb-8 lg:col-span-2">
-              <h2 className="text-2xl font-bold mb-6">Frappe Helpdesk Configuration</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="frappeUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                    Frappe Helpdesk URL
-                  </label>
-                  <Input
-                    id="frappeUrl"
-                    type="url"
-                    placeholder="https://your-helpdesk.frappe.cloud"
-                    value={frappeUrl}
-                    onChange={(e) => setFrappeUrl(e.target.value)}
-                    className="w-full"
-                  />
-                  <p className="text-sm text-gray-600 mt-1">
-                    Enter your Frappe Helpdesk instance URL to enable ticket creation
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Contact Form */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-6">Create Support Ticket</h2>
