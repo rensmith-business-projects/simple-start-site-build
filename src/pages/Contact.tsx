@@ -46,7 +46,7 @@ const Contact = () => {
       email: "",
       subject: "",
       message: "",
-      frappeUrl: "",
+      frappeUrl: "/frappe.simplestart.tech",
     },
   });
 
