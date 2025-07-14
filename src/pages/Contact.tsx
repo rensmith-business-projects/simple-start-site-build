@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,6 +100,21 @@ const Contact = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Add useEffect to load Calendly script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   return (
     <div className="animate-fade-in">
@@ -230,7 +244,7 @@ const Contact = () => {
               </Form>
             </div>
             
-            {/* Contact Information & Webhook Guide */}
+            {/* Contact Information & Calendly */}
             <div>
               <div className="bg-cream p-6 md:p-8 rounded-lg shadow-md mb-8">
                 <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
@@ -265,14 +279,15 @@ const Contact = () => {
               <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-6">Book a Consultation</h2>
                 <p className="text-gray-700 mb-6">
-                  Schedule a free 15-minute consultation to discuss your tech needs.
+                  Schedule a free 30-minute consultation to discuss your tech needs.
                 </p>
                 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <a href="https://calendly.com/contactbeau7" target="_blank" rel="noopener noreferrer" className="btn-primary">
-                    Book a Time Slot
-                  </a>
-                </div>
+                {/* Calendly inline widget */}
+                <div 
+                  className="calendly-inline-widget" 
+                  data-url="https://calendly.com/contactbeau7/30min" 
+                  style={{ minWidth: '320px', height: '700px' }}
+                ></div>
               </div>
             </div>
           </div>
