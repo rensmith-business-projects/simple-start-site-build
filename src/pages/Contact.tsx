@@ -16,21 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  subject: z.string().min(1, {
-    message: "Please select a subject.",
-  }),
-  message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
-  }),
-});
-
 const frappeFormSchema = z.object({
   subject: z.string().min(1, {
     message: "Subject is required.",
@@ -45,26 +30,12 @@ const frappeFormSchema = z.object({
 
 const Contact = () => {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFrappeSubmitting, setIsFrappeSubmitting] = useState(false);
   
-  // Webhook URL - you can configure this in your webhook service
-  const WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_KEY/";
-
   // Frappe configuration
   const FRAPPE_SITE_URL = "https://frappe.simplestart.tech";
   const API_KEY = "8483601ba924cb2";
   const API_SECRET = "6743df0d13ae55c";
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
-  });
 
   const frappeForm = useForm<z.infer<typeof frappeFormSchema>>({
     resolver: zodResolver(frappeFormSchema),
@@ -74,60 +45,6 @@ const Contact = () => {
       description: "",
     },
   });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
-    
-    try {
-      // Send data to webhook
-      const webhookData = {
-        name: values.name,
-        email: values.email,
-        subject: values.subject,
-        message: values.message,
-        timestamp: new Date().toISOString(),
-        source: "Contact Form",
-        // Additional metadata
-        user_agent: navigator.userAgent,
-        page_url: window.location.href
-      };
-
-      console.log("Sending data to webhook:", webhookData);
-
-      const response = await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify(webhookData),
-      });
-
-      if (response.ok) {
-        console.log("Webhook triggered successfully");
-        
-        toast({
-          title: "Support request submitted!",
-          description: "Your message has been sent successfully. We'll get back to you soon!",
-        });
-        
-        form.reset();
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-    } catch (error) {
-      console.error("Error sending webhook:", error);
-      
-      toast({
-        title: "Submission failed",
-        description: "There was an issue sending your message. Please try again or contact us directly using the information below.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const onFrappeSubmit = async (values: z.infer<typeof frappeFormSchema>) => {
     setIsFrappeSubmitting(true);
@@ -168,7 +85,7 @@ const Contact = () => {
       
       toast({
         title: "Ticket submission failed",
-        description: "There was an issue creating your ticket. Please try the webhook form instead or contact us directly.",
+        description: "There was an issue creating your ticket. Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
@@ -198,7 +115,7 @@ const Contact = () => {
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            Get in touch with us to discuss how we can help with your tech needs. Choose between our webhook integration or direct ticket submission.
+            Get in touch with us to discuss how we can help with your tech needs. Submit a support ticket or book a consultation.
           </p>
         </div>
       </section>
@@ -207,103 +124,9 @@ const Contact = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Webhook Contact Form */}
-            <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-6">Send Message via Webhook</h2>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="john@example.com" type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject</FormLabel>
-                        <FormControl>
-                          <select 
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange focus:border-orange transition"
-                            {...field}
-                          >
-                            <option value="">Select a subject</option>
-                            <option value="Website Setup">Website Setup</option>
-                            <option value="Email Configuration">Email Configuration</option>
-                            <option value="Cloud Apps Setup">Cloud Apps Setup</option>
-                            <option value="IT Support">IT Support</option>
-                            <option value="Technical Issue">Technical Issue</option>
-                            <option value="Feature Request">Feature Request</option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Describe your issue or request in detail..." 
-                            className="resize-none" 
-                            rows={5}
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending Message...
-                      </>
-                    ) : 'Send Message'}
-                  </Button>
-                </form>
-              </Form>
-            </div>
-
             {/* Direct Frappe Ticket Form */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-6">Submit a Ticket</h2>
+              <h2 className="text-2xl font-bold mb-6">Submit a Support Ticket</h2>
               <p className="text-sm text-gray-600 mb-4">Direct submission to SimpleStart Helpdesk</p>
               
               <Form {...frappeForm}>
@@ -369,10 +192,8 @@ const Contact = () => {
                 </form>
               </Form>
             </div>
-          </div>
 
-          {/* Contact Information & Calendly */}
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Contact Information */}
             <div className="bg-cream p-6 md:p-8 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
               
@@ -402,7 +223,10 @@ const Contact = () => {
                 </div>
               </div>
             </div>
-            
+          </div>
+
+          {/* Calendly Section */}
+          <div className="mt-12">
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-6">Book a Consultation</h2>
               <p className="text-gray-700 mb-6">
@@ -420,28 +244,14 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Webhook Setup Guide */}
+      {/* Support Information */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8 text-center">Integration Options</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">How We Can Help</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-4">Webhook Integration</h3>
-              <p className="text-gray-700 mb-4">
-                The webhook form allows you to connect to any automation service like Zapier, Make, or n8n. 
-                Configure your webhook URL in the code to process form submissions.
-              </p>
-              <ul className="list-disc list-inside text-gray-700 space-y-2">
-                <li>Connect to 6000+ apps via Zapier</li>
-                <li>Advanced automation with Make</li>
-                <li>Custom integrations with n8n</li>
-                <li>Flexible data processing</li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-4">Direct Frappe Tickets</h3>
+              <h3 className="text-xl font-bold mb-4">Support Tickets</h3>
               <p className="text-gray-700 mb-4">
                 Submit tickets directly to the SimpleStart Helpdesk system. This creates tickets 
                 immediately in our support system for faster response times.
@@ -451,6 +261,20 @@ const Contact = () => {
                 <li>Automatic ticket ID generation</li>
                 <li>Direct integration with support team</li>
                 <li>Priority and categorization</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-4">Consultation Booking</h3>
+              <p className="text-gray-700 mb-4">
+                Book a free consultation to discuss your specific needs and get personalized 
+                recommendations for your tech setup.
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2">
+                <li>Free 30-minute sessions</li>
+                <li>Personalized recommendations</li>
+                <li>Project planning assistance</li>
+                <li>Technology advice</li>
               </ul>
             </div>
           </div>
