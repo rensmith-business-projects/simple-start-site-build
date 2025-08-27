@@ -33,23 +33,21 @@ const Contact = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Google Forms Support Ticket */}
+            {/* Support Ticket Button */}
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-6">Submit a Support Ticket</h2>
-              <p className="text-sm text-gray-600 mb-4">Fill out the form below to get help with your tech needs</p>
+              <p className="text-sm text-gray-600 mb-4">Get help with your tech needs through our helpdesk system</p>
               
-              <div className="w-full overflow-hidden rounded-lg">
-                <iframe 
-                  src="https://docs.google.com/forms/d/e/1FAIpQLSe6-dGY0eC2AIg5VyzKnCJKjcr-eGDtwRsi7N2shDkIB0_6wg/viewform?embedded=true" 
-                  width="100%" 
-                  height="689" 
-                  frameBorder="0" 
-                  marginHeight="0" 
-                  marginWidth="0"
-                  className="w-full"
+              <div className="text-center">
+                <button 
+                  onClick={() => window.open('https://helpdesk.simplestart.tech/app/web-form/tickets-final/new', '_blank')}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-11 rounded-md px-8 mb-4"
                 >
-                  Loading…
-                </iframe>
+                  Open Support Ticket Form
+                </button>
+                <p className="text-xs text-gray-500">
+                  * Please note: Login or signup is required to submit a ticket
+                </p>
               </div>
             </div>
 
